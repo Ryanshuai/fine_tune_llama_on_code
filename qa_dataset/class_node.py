@@ -1,54 +1,64 @@
-import re
+import ast
 
 from qa_dataset.qa_base_node import Node
 
 
-class PyClass(Node):
-    def __init__(self, class_name, class_instance):
+class PyClass(Node, ast.NodeVisitor):
+    def __init__(self, node):
         super().__init__()
-        self.name = class_name
-        self.instance = class_instance
-        self.methods = []
+        self.name = node.body[0].name
+        self.node = node
+        self.methods = dict()
         self.attributes = []
+        self.visit(node)
 
         self.qa_questions = [purpose_question, summary_question, list_methods_question, list_attributes_question]
+
+    def visit_FunctionDef(self, node):
+        self.methods[node.name] = ast.unparse(node)
+        self.generic_visit(node)
+
+    def visit_Assign(self, node):
+        for target in node.targets:
+            if isinstance(target, ast.Name):
+                self.attributes.append(target.id)
+        self.generic_visit(node)
 
     def __repr__(self, ):
         return f"PyClass({self.name})\n"
 
 
-def purpose_question(class_name, class_code):
-    question = f"what is the purpose of the class {class_name}?"
-    prompt = f"what is the purpose of the class: \n{class_code}"
+def purpose_question(py_class: PyClass):
+    question = f"what is the purpose of the class {py_class.name}?"
+    prompt = f"what is the purpose of the class: \n{ast.unparse(py_class.node)}"
     answer = None
     return question, prompt, answer
 
 
-def summary_question(class_name, class_code):
-    question = f"summarize the class {class_name}"
-    prompt = f"summarize the class: \n{class_code}"
+def summary_question(py_class: PyClass):
+    question = f"summarize the class {py_class.name}?"
+    prompt = f"summarize the class: \n{ast.unparse(py_class.node)}"
     answer = None
     return question, prompt, answer
 
 
-def list_methods_question(class_name, class_code):
-    question = f"list the methods in the class {class_name}"
+def list_methods_question(py_class: PyClass):
+    question = f"list the methods in the class {py_class.name}"
     prompt = None
-
-    pattern = r'\bdef\b\s+(\w+)\('
-    answer = re.findall(pattern, class_code)
-    answer = " ".join(answer)
+    answer = " ".join(py_class.methods.keys())
     return question, prompt, answer
 
 
-def list_attributes_question(class_name, class_code):
-    question = f"list the attributes in the class {class_name}"
-    prompt = f"list the attributes in the class: \n{class_code}, do not explain, just list them."
-    answer = None
+def list_attributes_question(py_class: PyClass):
+    question = f"list the attributes in the class {py_class.name}"
+    prompt = None
+    answer = " ".join(py_class.attributes)
     return question, prompt, answer
 
 
 if __name__ == '__main__':
+    import ast
+
     example_class = """class Annotation(ABC):
         def __init__(self, **kwargs):
             self.annotations = None
@@ -89,10 +99,9 @@ if __name__ == '__main__':
                 if ratio < 0 or ratio > 1:
                     raise ValueError("The ratio must be between 0 and 1.")
     """
-    class_name = "data.Annotation"
-    qa_data = ask_questions_about_class(class_name, example_class)
+    cls = ast.parse(example_class)
+    py_class = PyClass(cls)
+    py_class.prepare_qa()
 
-    for qa in qa_data:
-        print("-" * 50)
-        print("question:", qa["question"])
-        print("answer:", qa["answer"])
+    print(py_class.methods)
+    print(py_class.attributes)
