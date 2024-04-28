@@ -8,6 +8,10 @@ def llm_inference(messages, model='llama3:8b'):
     output = ollama.chat(model=model, messages=[messages_dict])
     return output["message"]["content"]
 
+def llm_generate(prompt, model='llama3:8b'):
+    output = ollama.generate(model=model, prompt=prompt,stream=False)
+    return output["response"]
+
 
 def send(chat):
     messages.append(
