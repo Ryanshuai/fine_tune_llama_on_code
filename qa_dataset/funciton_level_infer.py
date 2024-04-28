@@ -1,4 +1,4 @@
-from llama_inference import llm_inference
+from qa_dataset.llama_inference import llm_inference
 
 
 def purpose_question(function_name, function_code):
@@ -9,8 +9,8 @@ def purpose_question(function_name, function_code):
 
 
 def summary_question(function_name, function_code):
-    question = f"summarize the class {function_name}"
-    prompt = f"summarize the class: \n{function_code}"
+    question = f"summarize the function {function_name}"
+    prompt = f"summarize the function: \n{function_code}"
     answer = None
     return question, prompt, answer
 
@@ -32,7 +32,7 @@ def output_question(function_name, function_code):
 question_funcs = [purpose_question, summary_question, input_question, output_question]
 
 
-def ask_questions_about_class(class_name, class_code):
+def ask_questions_about_function(class_name, class_code):
     qa_data = []
     for question_func in question_funcs:
         question, prompt, answer = question_func(class_name, class_code)
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     return figure
     '''
     class_name = "add_metadata_to_image"
-    qa_data = ask_questions_about_class(class_name, example_function)
+    qa_data = ask_questions_about_function(class_name, example_function)
 
     for qa in qa_data:
         print("-" * 50)

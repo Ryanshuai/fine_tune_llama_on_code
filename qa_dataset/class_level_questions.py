@@ -1,6 +1,6 @@
 import re
 
-from llama_inference import llm_inference
+from qa_dataset.llama_inference import llm_inference
 
 
 def purpose_question(class_name, class_code):
