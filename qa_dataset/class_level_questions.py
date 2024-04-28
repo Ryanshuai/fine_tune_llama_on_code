@@ -95,5 +95,6 @@ if __name__ == '__main__':
 
     for qa in qa_data:
         print("-" * 50)
-        print(qa["question"])
-        print(qa["answer"])
+        print("question:", qa["question"])
+        print("answer:", qa["answer"])
+
