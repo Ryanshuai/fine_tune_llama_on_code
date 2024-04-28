@@ -1,6 +1,20 @@
 import re
 
-from qa_dataset.llama_inference import llm_inference
+from qa_dataset.qa_base_node import Node
+
+
+class PyClass(Node):
+    def __init__(self, class_name, class_instance):
+        super().__init__()
+        self.name = class_name
+        self.instance = class_instance
+        self.methods = []
+        self.attributes = []
+
+        self.qa_questions = [purpose_question, summary_question, list_methods_question, list_attributes_question]
+
+    def __repr__(self, ):
+        return f"PyClass({self.name})\n"
 
 
 def purpose_question(class_name, class_code):
@@ -32,21 +46,6 @@ def list_attributes_question(class_name, class_code):
     prompt = f"list the attributes in the class: \n{class_code}, do not explain, just list them."
     answer = None
     return question, prompt, answer
-
-
-question_funcs = [purpose_question, summary_question, list_methods_question, list_attributes_question]
-
-
-def ask_questions_about_class(class_name, class_code):
-    qa_data = []
-    for question_func in question_funcs:
-        question, prompt, answer = question_func(class_name, class_code)
-        if answer is None:
-            assert prompt is not None
-            answer = llm_inference(prompt)
-        qa_data.append({"question": question, "answer": answer})
-
-    return qa_data
 
 
 if __name__ == '__main__':
@@ -97,4 +96,3 @@ if __name__ == '__main__':
         print("-" * 50)
         print("question:", qa["question"])
         print("answer:", qa["answer"])
-

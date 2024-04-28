@@ -24,7 +24,7 @@ def augment_question(question):
 
 
 if __name__ == '__main__':
-    from funciton_level_infer import ask_questions_about_function
+    from function_node import ask_questions_about_function
 
     example_function = r'''
     def add_metadata_to_image(tensor: torch.Tensor, metadata: Dict[Any, Any]) -> Figure:
