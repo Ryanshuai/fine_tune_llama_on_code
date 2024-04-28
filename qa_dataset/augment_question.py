@@ -2,7 +2,6 @@ from qa_dataset.llama_inference import llm_inference
 
 
 def augment_question(question):
-    # 格式很难一致，summarize the class add_metadata_to_image 类似的问题会丢失关键信息。
     merged_q = (f"Give me other ways of saying questions: {question}, \
                 directly output other ways, don't answer, don't explain, don't provide anything else.\
                 list them one question per line. \
@@ -13,8 +12,15 @@ def augment_question(question):
     #             Do not split under_score-linked variables, do not split camelCase.\
     #             put two Enter at beginning of the result.")
 
-    new_q = llm_inference(merged_q)
-    return new_q
+    new_qs = llm_inference(merged_q)
+
+    try:
+        new_qs = new_qs.split("\n\n")[1]
+        new_qs = new_qs.split("\n")
+    except:
+        new_qs = [question]
+
+    return new_qs
 
 
 if __name__ == '__main__':
@@ -48,4 +54,7 @@ if __name__ == '__main__':
         print("-" * 50)
         question = qa["question"]
         print("original question:", question)
-        print("augmented question:", augment_question(question))
+        print("augmented question:")
+        new_qs = augment_question(question)
+        for new_q in new_qs:
+            print(new_q)
