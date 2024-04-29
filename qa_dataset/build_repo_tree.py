@@ -1,12 +1,12 @@
 import os.path
 
-from qa_dataset.file_node import File
+from qa_dataset.file_node import File, PythonFile
 from qa_dataset.folder_node import Folder
 
 
 def build_repo_tree(root_path):
     if os.path.isfile(root_path):
-        return File(root_path)
+        return PythonFile(root_path) if root_path.endswith(".py") else File(root_path)
 
     assert os.path.isdir(root_path)
     node = Folder(root_path)

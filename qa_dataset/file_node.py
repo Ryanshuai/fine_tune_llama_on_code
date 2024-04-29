@@ -1,7 +1,32 @@
 import os.path
+import ast
 from collections import defaultdict
 
 from qa_dataset.qa_base_node import Node
+
+
+class PythonFile(Node):
+    name_path_dict = defaultdict(set)
+
+    def __init__(self, path):
+        super().__init__()
+        self.name = os.path.basename(path)
+        self.path = path
+        self.content = None
+        self.import_from_file = []
+        self.ast_tree = None
+
+        PythonFile.name_path_dict[self.name].add(path)
+        self.qa_functions = [where_file_question]
+        self.read_file_to_ast()
+
+    def read_file_to_ast(self):
+        with open(self.path, "r") as f:
+            self.content = f.read()
+        self.ast_tree = ast.parse(self.content)
+
+    def __repr__(self, level=0):
+        return "\t" * level + f"File({self.name})\n"
 
 
 class File(Node):
@@ -13,6 +38,7 @@ class File(Node):
         self.path = path
         self.content = None
         self.import_from_file = []
+        self.ast_tree = None
 
         File.name_path_dict[self.name].add(path)
         self.qa_functions = [where_file_question]
