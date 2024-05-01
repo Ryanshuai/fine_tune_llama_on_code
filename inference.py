@@ -1,6 +1,6 @@
 from unsloth import FastLanguageModel
 
-from code_repo_dataset import prompt
+from code_repo_dataset import qa_prompt
 from train import max_seq_length, dtype, load_in_4bit
 
 model, tokenizer = FastLanguageModel.from_pretrained(
@@ -12,7 +12,7 @@ model, tokenizer = FastLanguageModel.from_pretrained(
 
 FastLanguageModel.for_inference(model)  # Enable native 2x faster inference
 
-input_str = prompt.format(
+input_str = qa_prompt.format(
     "Continue the fibonnaci sequence.",  # instruction
     "1, 1, 2, 3, 5, 8",  # input
     "",  # output - leave this blank for generation!

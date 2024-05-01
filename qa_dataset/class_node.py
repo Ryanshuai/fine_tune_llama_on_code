@@ -1,8 +1,10 @@
+import libcst as cst
 
 from qa_dataset.qa_base_node import Node
 from qa_dataset.function_node import PyFunction
-import libcst as cst
-class PyClass(Node,cst.CSTVisitor):
+
+
+class PyClass(Node, cst.CSTVisitor):
     def __init__(self, node):
         assert isinstance(node, cst.ClassDef)
         super().__init__()
@@ -13,37 +15,6 @@ class PyClass(Node,cst.CSTVisitor):
         self.qa_questions = [purpose_question, summary_question, list_methods_question, list_attributes_question]
         self.build_children_nodes()
 
-
-    def build_children_nodes(self):
-        for node in self.cst_node.body:
-            if isinstance(node, cst.FunctionDef):
-                self.children.append(PyFunction(node))
-            elif isinstance(node, cst.ClassDef):
-                self.children.append(PyClass(node))
-        return
-
-
-    def build_children_nodes(self):
-        for node in self.cst_node.body:
-            if isinstance(node, cst.FunctionDef):
-                self.children.append(PyFunction(node))
-            elif isinstance(node, cst.ClassDef):
-                self.children.append(PyClass(node))
-        return
-        
-
-    # def visit_FunctionDef(self, node):
-    #     self.methods[node.name] = ast.unparse(node)
-    #     self.generic_visit(node)
-
-    # def visit_Assign(self, node):
-    #     for target in node.targets:
-    #         if isinstance(target, cst.Name):
-    #             self.attributes.append(target.id)
-    #     self.generic_visit(node)
-
-
-    
     def build_children_nodes(self):
         body = self.cst_node.body
         if isinstance(body, cst.IndentedBlock):
@@ -62,11 +33,14 @@ def purpose_question(py_class: PyClass):
     answer = None
     return question, prompt, answer
 
+
 def inheritence_question(py_class: PyClass):
     question = f"Does this class {py_class.name} inheritant from any class?"
     prompt = f"Does this class inheritant from any class: \n{py_class.code}"
     answer = None
     return question, prompt, answer
+
+
 def summary_question(py_class: PyClass):
     question = f"summarize the class {py_class.name}?"
     prompt = f"summarize the class: \n{py_class.code}"
