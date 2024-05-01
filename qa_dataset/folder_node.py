@@ -11,16 +11,11 @@ class Folder(Node):
         super().__init__()
         self.name = os.path.basename(path)
         self.path = path
-        self.children = []
+        self.class_name = "Folder"
+
 
         Folder.name_path_dict[self.name].add(path)
         self.qa_functions = [where_folder_question]
-
-    def __repr__(self, level=0):
-        ret = "\t" * level + f"Folder({self.name})\n"
-        for child in self.children:
-            ret += child.__repr__(level + 1)
-        return ret
 
 
 def where_folder_question(folder):
@@ -28,3 +23,11 @@ def where_folder_question(folder):
     prompt = None
     answer = "\n" + "\n".join(Folder.name_path_dict[folder.name])
     return question, prompt, answer
+
+
+def where_inside_folder_question(folder):
+    question = f"where are the files inside the folder {folder.name}?"
+    #TODO
+    prompt = None
+    answer = "\n" + "\n".join(Folder.name_path_dict[folder.name])
+    return None
