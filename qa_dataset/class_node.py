@@ -12,8 +12,9 @@ class PyClass(Node, cst.CSTVisitor):
         self.cst_node = node
         self.class_name = "PyClass"
         self.code = cst.Module(body=[node]).code
-        self.qa_questions = [purpose_question, summary_question, list_methods_question, list_attributes_question]
         self.build_children_nodes()
+        self.qa_functions = [purpose_question, summary_question, list_methods_question]
+        self.qa = []
 
     def build_children_nodes(self):
         body = self.cst_node.body
@@ -51,10 +52,11 @@ def summary_question(py_class: PyClass):
 def list_methods_question(py_class: PyClass):
     question = f"list the methods in the class {py_class.name}"
     prompt = None
-    answer = " ".join(py_class.methods.keys())
+    answer = " ".join([node.name.value for node in py_class.cst_node.body.body if isinstance(node, cst.FunctionDef)])
     return question, prompt, answer
 
 
+# TODO
 def list_attributes_question(py_class: PyClass):
     question = f"list the attributes in the class {py_class.name}"
     prompt = None
@@ -63,8 +65,6 @@ def list_attributes_question(py_class: PyClass):
 
 
 if __name__ == '__main__':
-    import ast
-
     example_class = """class Annotation(ABC):
         def __init__(self, **kwargs):
             self.annotations = None
@@ -105,9 +105,13 @@ if __name__ == '__main__':
                 if ratio < 0 or ratio > 1:
                     raise ValueError("The ratio must be between 0 and 1.")
     """
-    cls = ast.parse(example_class)
-    py_class = PyClass(cls)
-    py_class.prepare_qa()
+    cst_tree = cst.parse_module(example_class)
+    # Need to traverse and find the ClassDef node
+    class_node = next(node for node in cst_tree.children if isinstance(node, cst.ClassDef))
+    py_class = PyClass(class_node)
+    qa = py_class.prepare_qa()
 
-    print(py_class.methods)
-    print(py_class.attributes)
+    for qa_pair in qa:
+        print("=" * 80)
+        print(qa_pair["question"])
+        print(qa_pair["answer"])

@@ -12,14 +12,14 @@ def llm_inference(messages, model='llama3:8b'):
 class Node(ABC):
     def __init__(self):
         super().__init__()
-        self.qa_questions = []
+        self.qa_functions = []
         self.class_name = "Node"
         self.children = []
 
     def prepare_qa(self):
         qa_data = []
-        for question_func in self.qa_questions:
-            question, prompt, answer = question_func(self)
+        for question_fn in self.qa_functions:
+            question, prompt, answer = question_fn(self)
             if answer is None:
                 assert prompt is not None
                 answer = llm_inference(prompt)
