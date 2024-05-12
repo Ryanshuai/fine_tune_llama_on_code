@@ -22,10 +22,10 @@ def build_repo_tree(root_path):
 
 
 if __name__ == '__main__':
-    from pathlib import Path
+    from constant import CODE_ROOT
 
-    CODE_ROOT = str(Path(__file__).parent.parent.absolute()) + os.sep + "nanoGPT"
     root = build_repo_tree(CODE_ROOT)
-    qa = root.prepare_qa()
+    print(root)
 
-    print(qa)
+    # qa = root.prepare_qa()
+    # print(qa)
