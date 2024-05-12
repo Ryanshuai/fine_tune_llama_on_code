@@ -1,10 +1,10 @@
-from qa_dataset.llama_inference import llm_inference
 import libcst as cst
 
 from qa_dataset.qa_base_node import Node
 
-class PyFunction(Node,cst.CSTVisitor):
-    
+
+class PyFunction(Node, cst.CSTVisitor):
+
     def __init__(self, node):
         assert isinstance(node, cst.FunctionDef)
         super().__init__()
@@ -13,8 +13,9 @@ class PyFunction(Node,cst.CSTVisitor):
         self.cst_node = node
         self.code = cst.Module(body=[node]).code
         self.attributes = []
-        self.qa_questions = [purpose_question, purpose_question2, summary_question, list_parameter_question, list_return_value_question]
-
+        self.qa_functions = [purpose_question, purpose_question2, summary_question, list_parameter_question,
+                             list_return_value_question]
+        self.qa = []
 
     def get_function_parameters(self):
         func_node = self.cst_node
@@ -23,29 +24,50 @@ class PyFunction(Node,cst.CSTVisitor):
         for param in func_node.params.params:
             params.append(param.name.value)
         # Handling variable arguments (*args)
-        if func_node.params.star_arg:
+        if isinstance(func_node.params.star_arg, cst.Param):
             params.append('*' + func_node.params.star_arg.name.value)
         # Handling keyword-only arguments
         for kwonly in func_node.params.kwonly_params:
             params.append(kwonly.name.value)
         # Handling keyword arguments (**kwargs)
-        if func_node.params.star_kwarg:
+        if isinstance(func_node.params.star_kwarg, cst.Param):
             params.append('**' + func_node.params.star_kwarg.name.value)
         return params
-        #Output a list of return value
+        # Output a list of return value
+
+    def get_return_statements(self):
+        func_body = self.cst_node.body
+        return_statements = []
+        for item in func_body.body:
+            if isinstance(item, cst.Return):
+                return_statements.append(item)
+            elif isinstance(item, (cst.If, cst.For, cst.While, cst.Try)):
+                return_statements.extend(self._extract_returns_from_compound(item))
+        return return_statements
+
+    def _extract_returns_from_compound(self, compound_stmt):
+        returns = []
+        for body_part in compound_stmt.body.body:
+            if isinstance(body_part, cst.Return):
+                returns.append(body_part)
+            elif isinstance(body_part, (cst.If, cst.For, cst.While, cst.Try)):
+                returns.extend(self._extract_returns_from_compound(body_part))
+        return returns
 
 
-    
 def purpose_question(pyfunction: PyFunction):
     question = f"what is the purpose of the function: {pyfunction.name}?"
     prompt = f"what is the purpose of the function:  \n{pyfunction.code}"
     answer = None
     return question, prompt, answer
+
+
 def purpose_question2(pyfunction: PyFunction):
     question = f"Generate a one-sentence description for the purpose of the function: {pyfunction.name}?"
     prompt = f"Generate a one-sentence description for the purpose of the function:  \n{pyfunction.code}"
     answer = None
     return question, prompt, answer
+
 
 def list_parameter_question(pyfunction: PyFunction):
     question = f"what are the return values of the function: {pyfunction.name}?"
@@ -54,18 +76,20 @@ def list_parameter_question(pyfunction: PyFunction):
     answer = f"Function '{pyfunction.name}' has return values: {return_values}"
     return question, prompt, answer
 
+
 def list_return_value_question(pyfunction: PyFunction):
     question = f"what are the return  of the function: {pyfunction.name}?"
     prompt = None
     parameters = pyfunction.get_function_parameters()
     answer = f"Function '{pyfunction.name}' has parameters: {parameters}"
     return question, prompt, answer
+
+
 def summary_question(pyfunction: PyFunction):
     question = f"summarize the function {pyfunction.name}"
     prompt = f"summarize the function: \n{pyfunction.code}"
     answer = None
     return question, prompt, answer
-
 
 
 def output_meaning_question(pyfunction: PyFunction):
@@ -74,42 +98,56 @@ def output_meaning_question(pyfunction: PyFunction):
     answer = None
     return question, prompt, answer
 
-def ask_questions_about_function(pyfunction: PyFunction):
-    qa_data = []
-    for question_func in pyfunction.question_funcs:
-        question, prompt, answer = question_func(pyfunction)
-        if answer is None:
-            assert prompt is not None
-            answer = llm_inference(prompt)
-        qa_data.append({"question": question, "answer": answer})
 
-    return qa_data
 if __name__ == '__main__':
-    example_function = r'''
-    def add_metadata_to_image(tensor: torch.Tensor, metadata: Dict[Any, Any]) -> Figure:
+    example_function = example_class = """class Annotation(ABC):
+        def __init__(self, **kwargs):
+            self.annotations = None
+            if "im_root" in kwargs and "annotation_path" in kwargs:
+                im_root = kwargs["im_root"]
+                annotation_path = kwargs["annotation_path"]
+                self.load_anno(annotation_path)
+                self.inject_im_root(im_root)
+
+            elif "annotations" in kwargs:
+                self.annotations = kwargs["annotations"]
+
+        @abstractmethod
+        def load_anno(self, annotation_path):
+            pass
+
+        @abstractmethod
+        def inject_im_root(self, im_root):
+            pass
+
+        @abstractmethod
+        def __len__(self):
+            pass
+
+        @abstractmethod
+        def __add__(self, other):
+            pass
+
+        @abstractmethod
+        def split(self, ratios):
+            pass
+
+        @staticmethod
+        def ratios_check(ratios):
+            if abs(sum(ratios) - 1.0) >= 1e-9:
+                raise ValueError("The sum of the ratios must equal 1.")
+            for ratio in ratios:
+                if ratio < 0 or ratio > 1:
+                    raise ValueError("The ratio must be between 0 and 1.")
     """
-    Displays an image and adds metadata as a title to the plot.
 
-    Args:
-        tensor (torch.Tensor): A tensor of shape (C, H, W) representing an image.
-        metadata (Dict[Any, Any]): A dictionary containing metadata to be displayed in the plot title.
+    cst_tree = cst.parse_module(example_function)
+    cst_clas_node = next(node for node in cst_tree.children if isinstance(node, cst.ClassDef))
+    function_node = cst_clas_node.body.body[0]
+    pyfunction = PyFunction(function_node)
+    qa = pyfunction.prepare_qa()
 
-    Returns:
-        figure (matplotlib.figure.Figure): A Matplotlib figure object containing the plotted image and metadata title.
-    """
-    figure = plt.figure()
-    img = tensor.cpu().numpy().transpose((1, 2, 0))
-    plt.imshow(img)
-    d = max(map(len, metadata.keys()))
-    texts = "\n".join([str(key) + "  " * (d - len(key)) + ":  " + str(value) for key, value in metadata.items()])
-    plt.suptitle(texts, fontsize=25, ha='left', va='top', x=0.01, y=0.99)
-    plt.tight_layout()
-    return figure
-    '''
-    class_name = "add_metadata_to_image"
-    qa_data = ask_questions_about_function(class_name, example_function)
-
-    for qa in qa_data:
-        print("-" * 50)
-        print("question:", qa["question"])
-        print("answer:", qa["answer"])
+    for qa_pair in qa:
+        print("=" * 80)
+        print(qa_pair["question"])
+        print(qa_pair["answer"])

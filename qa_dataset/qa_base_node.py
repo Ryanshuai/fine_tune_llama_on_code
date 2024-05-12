@@ -26,6 +26,7 @@ class Node(ABC):
             qa_data.append({"question": question, "answer": answer})
 
         return qa_data
+
     def __repr__(self, level=0):
         ret = "\t" * level + f"{self.class_name}({self.name})\n"
         for child in self.children:
