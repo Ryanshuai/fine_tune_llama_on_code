@@ -10,7 +10,6 @@ class PyClass(Node, cst.CSTVisitor):
         super().__init__()
         self.name = node.name.value
         self.cst_node = node
-        self.class_name = "PyClass"
         self.code = cst.Module(body=[node]).code
         self.build_children_nodes()
         self.qa_functions = [purpose_question, summary_question, list_methods_question]

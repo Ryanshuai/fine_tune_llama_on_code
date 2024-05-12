@@ -12,10 +12,10 @@ def llm_inference(messages, model='llama3:8b'):
 class Node(ABC):
     def __init__(self):
         super().__init__()
-        self.qa_functions = []
-        self.class_name = "Node"
-        self.children = []
+        self.name = ""
 
+        self.qa_functions = []
+        self.children = []
         self.qa = []
 
     def prepare_qa(self):
@@ -37,7 +37,7 @@ class Node(ABC):
         return self.qa
 
     def __repr__(self, level=0):
-        ret = "\t" * level + f"{self.class_name}({self.name})\n"
+        ret = "\t" * level + f"{self.__class__.__name__}({self.name})\n"
         for child in self.children:
             ret += child.__repr__(level + 1)
         return ret

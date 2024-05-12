@@ -12,7 +12,6 @@ class Folder(Node):
         super().__init__()
         self.name = os.path.basename(path)
         self.path = path
-        self.class_name = "Folder"
 
         path_to_project = os.path.relpath(path, PROJECT_ROOT)
         Folder.name_path_dict[self.name].add(path_to_project)
@@ -22,7 +21,7 @@ class Folder(Node):
 def where_folder_question(folder):
     question = f"where is the folder {folder.name} located?"
     prompt = None
-    answer = "\n" + "\n".join(Folder.name_path_dict[folder.name])
+    answer = "\n".join(Folder.name_path_dict[folder.name])
     return question, prompt, answer
 
 
@@ -30,5 +29,5 @@ def where_inside_folder_question(folder):
     question = f"where are the files inside the folder {folder.name}?"
     # TODO
     prompt = None
-    answer = "\n" + "\n".join(Folder.name_path_dict[folder.name])
+    answer = "\n".join(Folder.name_path_dict[folder.name])
     return None

@@ -24,8 +24,6 @@ class File(Node):
 
     def __init__(self, path):
         super().__init__()
-        self.class_name = "File"
-
         self.name = os.path.basename(path)
         self.path = path
         self.content = None
@@ -36,16 +34,11 @@ class File(Node):
         File.name_path_dict[self.name].add(path_to_project)
         self.qa_functions = [where_file_question]
 
-    def __repr__(self, level=0):
-        return "\t" * level + f"File({self.name})\n"
-
 
 class PythonFile(File):
 
     def __init__(self, path):
         super().__init__(path)
-        self.class_name = "PythonFile"
-
         self.cst_node = cst_parse_python_file(path)
         self.qa_functions = self.qa_functions + []  # Add more functions here
 
@@ -58,7 +51,6 @@ class PythonFile(File):
                 self.children.append(PyFunction(node))
             elif isinstance(node, cst.ClassDef):
                 self.children.append(PyClass(node))
-        return
 
     def get_top_level_code(self):
         top_level_code = []
@@ -75,5 +67,5 @@ class PythonFile(File):
 def where_file_question(file):
     question = f"where is the file {file.name} located?"
     prompt = None
-    answer = "\n" + "\n".join(File.name_path_dict[file.name])
+    answer = "\n".join(File.name_path_dict[file.name])
     return question, prompt, answer

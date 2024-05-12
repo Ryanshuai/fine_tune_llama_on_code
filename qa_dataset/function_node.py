@@ -5,10 +5,9 @@ from qa_dataset.qa_base_node import Node
 
 class PyFunction(Node, cst.CSTVisitor):
 
-    def __init__(self, node):
+    def __init__(self, node, parent_class=None):
         assert isinstance(node, cst.FunctionDef)
         super().__init__()
-        self.class_name = "PyFunction"
         self.name = node.name.value
         self.cst_node = node
         self.code = cst.Module(body=[node]).code
