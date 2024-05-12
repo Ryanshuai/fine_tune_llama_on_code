@@ -16,16 +16,25 @@ class Node(ABC):
         self.class_name = "Node"
         self.children = []
 
+        self.qa = []
+
     def prepare_qa(self):
-        qa_data = []
         for question_fn in self.qa_functions:
             question, prompt, answer = question_fn(self)
             if answer is None:
                 assert prompt is not None
                 answer = llm_inference(prompt)
-            qa_data.append({"question": question, "answer": answer})
 
-        return qa_data
+            print("=" * 80)
+            print(f"Question: {question}")
+            print(f"Answer: {answer}")
+
+            self.qa.append({"question": question, "answer": answer})
+
+        for child in self.children:
+            self.qa.extend(child.prepare_qa())
+
+        return self.qa
 
     def __repr__(self, level=0):
         ret = "\t" * level + f"{self.class_name}({self.name})\n"

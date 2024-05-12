@@ -14,7 +14,6 @@ class PyClass(Node, cst.CSTVisitor):
         self.code = cst.Module(body=[node]).code
         self.build_children_nodes()
         self.qa_functions = [purpose_question, summary_question, list_methods_question]
-        self.qa = []
 
     def build_children_nodes(self):
         body = self.cst_node.body

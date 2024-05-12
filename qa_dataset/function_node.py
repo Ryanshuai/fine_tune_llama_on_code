@@ -15,7 +15,6 @@ class PyFunction(Node, cst.CSTVisitor):
         self.attributes = []
         self.qa_functions = [purpose_question, purpose_question2, summary_question, list_parameter_question,
                              list_return_value_question]
-        self.qa = []
 
     def get_function_parameters(self):
         func_node = self.cst_node
