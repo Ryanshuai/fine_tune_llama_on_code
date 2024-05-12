@@ -3,6 +3,7 @@ from collections import defaultdict
 
 from qa_dataset.qa_base_node import Node
 
+from constant import PROJECT_ROOT
 
 class Folder(Node):
     name_path_dict = defaultdict(set)
@@ -13,8 +14,8 @@ class Folder(Node):
         self.path = path
         self.class_name = "Folder"
 
-
-        Folder.name_path_dict[self.name].add(path)
+        path_to_project = os.path.relpath(path, PROJECT_ROOT)
+        Folder.name_path_dict[self.name].add(path_to_project)
         self.qa_functions = [where_folder_question]
 
 
@@ -27,7 +28,7 @@ def where_folder_question(folder):
 
 def where_inside_folder_question(folder):
     question = f"where are the files inside the folder {folder.name}?"
-    #TODO
+    # TODO
     prompt = None
     answer = "\n" + "\n".join(Folder.name_path_dict[folder.name])
     return None

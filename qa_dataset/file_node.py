@@ -6,6 +6,8 @@ from qa_dataset.qa_base_node import Node
 from qa_dataset.function_node import PyFunction
 from qa_dataset.class_node import PyClass
 
+from constant import PROJECT_ROOT
+
 def cst_parse_python_file(file_path):
     with open(file_path, 'r') as file:
         source_code = file.read()
@@ -29,7 +31,8 @@ class PythonFile(Node):
         self.import_from_file = []
         self.cst_node = cst_parse_python_file(path)
 
-        PythonFile.name_path_dict[self.name].add(path)
+        path_to_project = os.path.relpath(path, PROJECT_ROOT)
+        PythonFile.name_path_dict[self.name].add(path_to_project)
         self.qa_functions = [where_file_question]
 
         self.top_level_code = self.get_top_level_code()
@@ -68,7 +71,8 @@ class File(Node):
         self.import_from_file = []
         self.ast_node = None
 
-        File.name_path_dict[self.name].add(path)
+        path_to_project = os.path.relpath(path, PROJECT_ROOT)
+        File.name_path_dict[self.name].add(path_to_project)
         self.qa_functions = [where_file_question]
 
     def __repr__(self, level=0):
