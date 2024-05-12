@@ -34,7 +34,7 @@ class PyFunction(Node, cst.CSTVisitor):
         return params
         # Output a list of return value
 
-    def get_return_statements(self):
+    def get_return_statements(self) -> list:
         func_body = self.cst_node.body
         return_statements = []
         for item in func_body.body:
@@ -69,18 +69,18 @@ def purpose_question2(pyfunction: PyFunction):
 
 
 def list_parameter_question(pyfunction: PyFunction):
-    question = f"what are the return values of the function: {pyfunction.name}?"
+    question = f"What are the return values of the function: {pyfunction.name}?"
     prompt = None
-    return_values = pyfunction.get_return_statements
-    answer = f"Function '{pyfunction.name}' has return values: {return_values}"
+    return_values = pyfunction.get_return_statements()
+    answer = " ".join(return_values)
     return question, prompt, answer
 
 
 def list_return_value_question(pyfunction: PyFunction):
-    question = f"what are the return  of the function: {pyfunction.name}?"
+    question = f"What are the return of the function: {pyfunction.name}?"
     prompt = None
     parameters = pyfunction.get_function_parameters()
-    answer = f"Function '{pyfunction.name}' has parameters: {parameters}"
+    answer = " ".join(parameters)
     return question, prompt, answer
 
 
