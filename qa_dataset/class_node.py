@@ -21,7 +21,7 @@ class PyClass(Node, cst.CSTVisitor):
 
         for node in body:
             if isinstance(node, cst.FunctionDef):
-                self.children.append(PyFunction(node))
+                self.children.append(PyFunction(node, parent_class=self.name))
             elif isinstance(node, cst.ClassDef):
                 self.children.append(PyClass(node))
 

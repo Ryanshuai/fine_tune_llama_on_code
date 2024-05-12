@@ -5,10 +5,11 @@ from qa_dataset.qa_base_node import Node
 
 class PyFunction(Node, cst.CSTVisitor):
 
-    def __init__(self, node, parent_class=None):
+    def __init__(self, node, parent_class=""):
         assert isinstance(node, cst.FunctionDef)
         super().__init__()
         self.name = node.name.value
+        self.parent_class = parent_class + "." if parent_class else ""
         self.cst_node = node
         self.code = cst.Module(body=[node]).code
         self.attributes = []
@@ -54,21 +55,21 @@ class PyFunction(Node, cst.CSTVisitor):
 
 
 def purpose_question(pyfunction: PyFunction):
-    question = f"what is the purpose of the function: {pyfunction.name}?"
+    question = f"what is the purpose of the function: {pyfunction.parent_class}{pyfunction.name}?"
     prompt = f"what is the purpose of the function:  \n{pyfunction.code}"
     answer = None
     return question, prompt, answer
 
 
 def purpose_question2(pyfunction: PyFunction):
-    question = f"Generate a one-sentence description for the purpose of the function: {pyfunction.name}?"
+    question = f"Generate a one-sentence description for the purpose of the function: {pyfunction.parent_class}{pyfunction.name}?"
     prompt = f"Generate a one-sentence description for the purpose of the function:  \n{pyfunction.code}"
     answer = None
     return question, prompt, answer
 
 
 def list_parameter_question(pyfunction: PyFunction):
-    question = f"What are the return values of the function: {pyfunction.name}?"
+    question = f"What are the return values of the function: {pyfunction.parent_class}{pyfunction.name}?"
     prompt = None
     return_values = pyfunction.get_return_statements()
     answer = " ".join(return_values)
@@ -76,7 +77,7 @@ def list_parameter_question(pyfunction: PyFunction):
 
 
 def list_return_value_question(pyfunction: PyFunction):
-    question = f"What are the return of the function: {pyfunction.name}?"
+    question = f"What are the return of the function: {pyfunction.parent_class}{pyfunction.name}?"
     prompt = None
     parameters = pyfunction.get_function_parameters()
     answer = " ".join(parameters)
@@ -84,14 +85,14 @@ def list_return_value_question(pyfunction: PyFunction):
 
 
 def summary_question(pyfunction: PyFunction):
-    question = f"summarize the function {pyfunction.name}"
+    question = f"summarize the function {pyfunction.parent_class}{pyfunction.name}"
     prompt = f"summarize the function: \n{pyfunction.code}"
     answer = None
     return question, prompt, answer
 
 
 def output_meaning_question(pyfunction: PyFunction):
-    question = f"what is the meaning of the output of the function {pyfunction.name}?"
+    question = f"what is the meaning of the output of the function {pyfunction.parent_class}{pyfunction.name}?"
     prompt = f"what is the meaning of the output of the function : \n{pyfunction.code}"
     answer = None
     return question, prompt, answer
