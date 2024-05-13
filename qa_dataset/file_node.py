@@ -31,6 +31,7 @@ class File(Node):
         self.ast_node = None
 
         path_to_project = os.path.relpath(path, PROJECT_ROOT)
+        path_to_project = path_to_project.replace("\\", "/")
         File.name_path_dict[self.name].add(path_to_project)
         self.qa_functions = [where_file_question]
 

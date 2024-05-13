@@ -71,16 +71,16 @@ def purpose_question2(pyfunction: PyFunction):
 def list_parameter_question(pyfunction: PyFunction):
     question = f"What are the return values of the function: {pyfunction.parent_class}{pyfunction.name}?"
     prompt = None
-    return_values = pyfunction.get_return_statements()
-    answer = " ".join(return_values)
+    parameters = pyfunction.get_return_statements()
+    answer = " ".join(parameters)
     return question, prompt, answer
 
 
 def list_return_value_question(pyfunction: PyFunction):
     question = f"What are the return of the function: {pyfunction.parent_class}{pyfunction.name}?"
     prompt = None
-    parameters = pyfunction.get_function_parameters()
-    answer = " ".join(parameters)
+    return_values = pyfunction.get_function_parameters()
+    answer = " ".join(return_values) if return_values else "None"
     return question, prompt, answer
 
 

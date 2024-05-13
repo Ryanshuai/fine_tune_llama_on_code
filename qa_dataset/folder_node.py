@@ -14,6 +14,7 @@ class Folder(Node):
         self.path = path
 
         path_to_project = os.path.relpath(path, PROJECT_ROOT)
+        path_to_project = path_to_project.replace("\\", "/")
         Folder.name_path_dict[self.name].add(path_to_project)
         self.qa_functions = [where_folder_question]
 

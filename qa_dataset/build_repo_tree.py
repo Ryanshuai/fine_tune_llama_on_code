@@ -22,10 +22,14 @@ def build_repo_tree(root_path):
 
 
 if __name__ == '__main__':
+    import json
     from constant import CODE_ROOT
 
     root = build_repo_tree(CODE_ROOT)
-    print(root)
+    # print(root)
 
-    # qa = root.prepare_qa()
+    qa = root.prepare_qa()
     # print(qa)
+
+    output_json = os.path.join(project_path, "qa_dataset", "qa_dataset.json")
+    json.dump(qa, open(output_json, "w"), indent=4)
